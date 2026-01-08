@@ -3,27 +3,27 @@ package service;
 import models.TipoTransacao;
 import models.Transacao;
 import repository.RepositorioTransacoes;
-
 import java.util.List;
 
 public class ServicoFinancas {
-    //Atributos
+
     private RepositorioTransacoes repositorio;
 
     public ServicoFinancas(RepositorioTransacoes repositorio) {
         this.repositorio = repositorio;
     }
 
-    //Metodos
+    public List<Transacao> getTransacoes() {
+        return repositorio.listarTransacoes();
+    }
+
     public double calcularSaldo(){
         double saldoAtual = 0;
-        List <Transacao> historicoTr = repositorio.listarTransacoes();
-
-        for (Transacao tr : historicoTr){
+        // Pede a lista FRESCA para o repositório
+        for (Transacao tr : repositorio.listarTransacoes()){
             if (tr.getTipo() == TipoTransacao.RECEITA){
                 saldoAtual += tr.getValor();
             }
-
             if (tr.getTipo() == TipoTransacao.DESPESA){
                 saldoAtual -= tr.getValor();
             }
@@ -31,11 +31,10 @@ public class ServicoFinancas {
         return saldoAtual;
     }
 
-    public boolean adicionarTransacao(Transacao t){
+    public void adicionarTransacao(Transacao t){
         if (t.getValor() <= 0){
-            return false;
+            return;
         }
         repositorio.adicionarTransacao(t);
-        return true;
     }
 }

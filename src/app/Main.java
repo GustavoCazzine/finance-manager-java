@@ -30,7 +30,8 @@ public class Main {
                     1. Adicionar Receita
                     2. Adicionar Despesa
                     3. Exibir Saldo
-                    4. Sair
+                    4. Ver Extrato
+                    5. Sair
                     Escolha uma opção:
                     """);
             //Usuario escolhe uma opção
@@ -59,8 +60,26 @@ public class Main {
                     System.out.println("=== FINANÇAS APP ===\n");
                     System.out.printf("Saldo atual: %.2f", servico.calcularSaldo());
                     break;
-                //Encerrar sistema
+                //Ver Extrato
                 case 4:
+                    System.out.println("=== EXTRATO ===");
+                    // O Main pede a lista ao serviço
+                    var lista = servico.getTransacoes();
+
+                    int indice = 1;
+                    for (Transacao tr : lista) {
+                        String sinalTipo = (tr.getTipo() == TipoTransacao.RECEITA) ? "+" : "-";
+                        // A formatação visual fica aqui na View
+                        System.out.printf("%d. %s | %s R$%.2f (%s)\n",
+                                indice, tr.getDescricao(), sinalTipo, tr.getValor(), tr.getTipo());
+                        indice++;
+                    }
+                    // Dica: Mostrar o saldo no final do extrato fica chique
+                    System.out.println("--------------------");
+                    System.out.printf("SALDO FINAL: R$%.2f\n", servico.calcularSaldo());
+                    break;
+                //Encerrar sistema
+                case 5:
                     System.out.println("Finalizando programa...");
                     entradaUsuario.close();
                     return;
