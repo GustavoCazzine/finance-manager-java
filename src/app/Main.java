@@ -4,8 +4,10 @@ import models.TipoTransacao;
 import models.Transacao;
 import repository.RepositorioTransacoes;
 import service.ServicoFinancas;
+import utils.GerenciadorArquivos;
 
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -14,8 +16,16 @@ public class Main {
         RepositorioTransacoes repository = new RepositorioTransacoes();
         //Iniciando serviços
         ServicoFinancas servico = new ServicoFinancas(repository);
+        //Iniciando CSV
+        GerenciadorArquivos arquivoCSV = new GerenciadorArquivos();
         //Iniciando Scanner
         Scanner entradaUsuario = new Scanner(System.in);
+        //Recuperando dados do arquivo CSV
+        List<Transacao> dadosAntigos = arquivoCSV.carretarTransacoes();
+        for (Transacao t : dadosAntigos){
+            servico.adicionarTransacao(t);
+       a
+        }
         //Iniciando loop principal
         while (true){
             //Iniciando variaveis mais utilizadas
@@ -48,12 +58,12 @@ public class Main {
                 //Adicionar RECEITA
                 case 1:
                     registrarEntrada(servico, entradaUsuario, TipoTransacao.RECEITA);
-
+                    arquivoCSV.salvarTransacoes(servico.getTransacoes());
                     break;
                 //Adicionar DESPESA
                 case 2:
                     registrarEntrada(servico, entradaUsuario, TipoTransacao.DESPESA);
-
+                    arquivoCSV.salvarTransacoes(servico.getTransacoes());
                     break;
                 //Ver saldo atual
                 case 3:

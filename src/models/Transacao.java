@@ -14,6 +14,11 @@ public class Transacao {
         this.tipo = tipo;
     }
 
+    //Metodos
+    public String toCSV(){
+        return getDescricao() + ";" + getValor() + ";" + getTipo();
+    }
+
     //Metodos especiais
     public String getDescricao() {
         return descricao;
@@ -27,7 +32,6 @@ public class Transacao {
         return tipo;
     }
     //toString
-
     @Override
     public String toString() {
         return "Transacao{" +
