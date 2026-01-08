@@ -1,31 +1,43 @@
 # 💰 Gerenciador de Finanças Pessoais (Java + MySQL)
 
-Aplicação de console para controle financeiro pessoal, desenvolvida para praticar lógica de programação, Orientação a Objetos e integração com Banco de Dados (JDBC).
+Aplicação de console para controle financeiro pessoal. Este projeto marca a evolução de estudos em Java, saindo da lógica em memória para uma aplicação conectada a um banco de dados real.
+
+## 🧠 Sobre o Desenvolvimento
+
+Este projeto foi desenvolvido em duas etapas distintas de aprendizado:
+
+1.  **Lógica e Regras de Negócio (Autoral):**
+    * Desenvolvimento manual de toda a lógica de programação (loops, condicionais, tratamento de exceções).
+    * Estruturação da Orientação a Objetos (`Models`, `Service` e `Main`).
+    * Implementação das regras de cálculo de saldo e validações.
+
+2.  **Infraestrutura e Banco de Dados (Mentoria/Guiado):**
+    * A camada de persistência (`Repository/DAO` e `UTils`) foi implementada com auxílio de mentoria técnica (AI) para introdução ao padrão JDBC e arquitetura Enterprise.
+    * Scripts SQL e configuração de drivers foram fornecidos para estudo e integração.
 
 ## 🚀 Funcionalidades
 
 - [x] Adicionar Receitas
 - [x] Adicionar Despesas
 - [x] Cálculo automático de saldo
-- [x] Extrato detalhado vindo do banco de dados
+- [x] Extrato detalhado
 - [x] Persistência de dados MySQL (Padrão DAO)
 
 ## 🛠️ Tecnologias Utilizadas
 
-- **Java 25** (Lógica e Regras de Negócio)
-- **MySQL 8** (Banco de Dados Relacional)
-- **JDBC** (Java Database Connectivity)
-- **DBeaver** (Cliente SQL para testes)
+- **Java 25** (Core Logic)
+- **MySQL 8** (Banco de Dados)
+- **JDBC** (Driver de Conexão)
 - **IntelliJ IDEA** (IDE)
 
 ## 🏗️ Arquitetura
 
-O projeto segue uma arquitetura em camadas para desacoplamento:
-- **App (View):** Interação com o usuário via console.
-- **Service (Controller):** Regras de negócio e validações.
-- **Model:** Representação dos objetos (Transação, Enum).
-- **Repository (DAO):** Camada de acesso a dados (SQL puro).
-- **Infra:** Gerenciamento de conexões (Factory Pattern).
+O projeto segue uma arquitetura em camadas:
+- **App (View):** Menu e interação com usuário (Autoral).
+- **Service (Controller):** Lógica de negócio (Autoral).
+- **Model:** Objetos Transação e Enum (Autoral).
+- **Repository (DAO):** Comandos SQL e acesso a dados (Guiado).
+- **Infra:** Fábrica de conexões JDBC (Guiado).
 
 ## ⚙️ Como rodar o projeto
 
@@ -34,7 +46,7 @@ O projeto segue uma arquitetura em camadas para desacoplamento:
 2. Ter o **MySQL Server** rodando.
 
 ### Configuração do Banco
-Execute o script abaixo no seu cliente MySQL (ex: DBeaver) para criar a estrutura:
+Execute o script abaixo no seu cliente MySQL (ex: DBeaver) para criar a estrutura necessária:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS financas_db;
