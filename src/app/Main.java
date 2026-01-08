@@ -1,42 +1,34 @@
 package app;
 
+import utils.ConnectionFactory;
 import models.TipoTransacao;
 import models.Transacao;
-import repository.RepositorioTransacoes;
+import repository.TransacaoDAO;
 import service.ServicoFinancas;
-import utils.GerenciadorArquivos;
 
+import java.sql.Connection;
 import java.util.InputMismatchException;
-import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args){
-        //Iniciando repository
-        RepositorioTransacoes repository = new RepositorioTransacoes();
-        //Iniciando serviços
-        ServicoFinancas servico = new ServicoFinancas(repository);
-        //Iniciando CSV
-        GerenciadorArquivos arquivoCSV = new GerenciadorArquivos();
-        //Iniciando Scanner
-        Scanner entradaUsuario = new Scanner(System.in);
-        //Recuperando dados do arquivo CSV
-        List<Transacao> dadosAntigos = arquivoCSV.carretarTransacoes();
-        for (Transacao t : dadosAntigos){
-            servico.adicionarTransacao(t);
-       a
-        }
-        //Iniciando loop principal
-        while (true){
-            //Iniciando variaveis mais utilizadas
-            String descUsuario;
-            double valUsuario;
-            int opcaoUsuario;
+    public static void main(String[] args) {
 
-            //Exibir menu
+        // 1. PREPARAÇÃO DA INFRAESTRUTURA (Conexão e DAO)
+        System.out.println("Conectando ao banco de dados...");
+        Connection conexao = new ConnectionFactory().recuperarConexao();
+        TransacaoDAO dao = new TransacaoDAO(conexao);
+
+        // 2. INICIALIZAÇÃO DO SERVIÇO (Injetando o DAO)
+        ServicoFinancas servico = new ServicoFinancas(dao);
+
+        Scanner entradaUsuario = new Scanner(System.in);
+        System.out.println("Sistema iniciado com sucesso!");
+
+        // 3. LOOP PRINCIPAL
+        while (true) {
             System.out.println("""
                     
-                    === FINANÇAS APP ===
+                    === FINANÇAS APP (MySQL Edition) ===
                     1. Adicionar Receita
                     2. Adicionar Despesa
                     3. Exibir Saldo
@@ -44,84 +36,72 @@ public class Main {
                     5. Sair
                     Escolha uma opção:
                     """);
-            //Usuario escolhe uma opção
-            if (entradaUsuario.hasNextInt()){
+
+            int opcaoUsuario;
+            try {
                 opcaoUsuario = entradaUsuario.nextInt();
-            } else {
-                System.out.println("Opção inválida! Digite um número.");
-                entradaUsuario.nextLine();
+            } catch (InputMismatchException e) {
+                System.out.println("Erro: Digite apenas números.");
+                entradaUsuario.nextLine(); // Limpa buffer
                 continue;
             }
 
-            //Switch para guiar o usuario
-            switch (opcaoUsuario){
-                //Adicionar RECEITA
+            switch (opcaoUsuario) {
                 case 1:
                     registrarEntrada(servico, entradaUsuario, TipoTransacao.RECEITA);
-                    arquivoCSV.salvarTransacoes(servico.getTransacoes());
                     break;
-                //Adicionar DESPESA
                 case 2:
                     registrarEntrada(servico, entradaUsuario, TipoTransacao.DESPESA);
-                    arquivoCSV.salvarTransacoes(servico.getTransacoes());
                     break;
-                //Ver saldo atual
                 case 3:
-                    System.out.println("=== FINANÇAS APP ===\n");
-                    System.out.printf("Saldo atual: %.2f", servico.calcularSaldo());
+                    System.out.println("=== SALDO ===");
+                    System.out.printf("R$ %.2f\n", servico.calcularSaldo());
                     break;
-                //Ver Extrato
                 case 4:
                     System.out.println("=== EXTRATO ===");
-                    // O Main pede a lista ao serviço
                     var lista = servico.getTransacoes();
-
-                    int indice = 1;
                     for (Transacao tr : lista) {
-                        String sinalTipo = (tr.getTipo() == TipoTransacao.RECEITA) ? "+" : "-";
-                        // A formatação visual fica aqui na View
-                        System.out.printf("%d. %s | %s R$%.2f (%s)\n",
-                                indice, tr.getDescricao(), sinalTipo, tr.getValor(), tr.getTipo());
-                        indice++;
+                        String sinal = (tr.getTipo() == TipoTransacao.RECEITA) ? "+" : "-";
+                        System.out.printf("%s | R$ %.2f (%s)\n", tr.getDescricao(), tr.getValor(), sinal);
                     }
-                    // Dica: Mostrar o saldo no final do extrato fica chique
                     System.out.println("--------------------");
-                    System.out.printf("SALDO FINAL: R$%.2f\n", servico.calcularSaldo());
+                    System.out.printf("SALDO FINAL: R$ %.2f\n", servico.calcularSaldo());
                     break;
-                //Encerrar sistema
                 case 5:
-                    System.out.println("Finalizando programa...");
-                    entradaUsuario.close();
+                    System.out.println("Fechando conexão e saindo...");
+                    try {
+                        entradaUsuario.close();
+                        conexao.close(); // Muito importante fechar a conexão ao sair!
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return;
-                //Qualquer opção inválida
                 default:
-                    System.out.println("Opção inválida, tente novamente.");
-                    entradaUsuario.nextLine();
-                    continue;
+                    System.out.println("Opção inválida.");
             }
         }
-
     }
 
-    private static void registrarEntrada(ServicoFinancas servico, Scanner entradaUsuario, TipoTransacao tipo) {
-        String descUsuario;
-        double valUsuario;
-        try{
+    // Método auxiliar (Clean Code)
+    private static void registrarEntrada(ServicoFinancas servico, Scanner scanner, TipoTransacao tipo) {
+        try {
+            scanner.nextLine(); // Limpa buffer
             String textoTipo = (tipo == TipoTransacao.RECEITA) ? "receita" : "despesa";
-            //Entrada dos dados
-            System.out.println("=== FINANÇAS APP ===\n");
-            entradaUsuario.nextLine();
+
             System.out.println("Descrição da " + textoTipo + ":");
-            descUsuario = entradaUsuario.nextLine().trim().toLowerCase();
+            String descricao = scanner.nextLine();
+
             System.out.println("Valor:");
-            valUsuario = entradaUsuario.nextDouble();
-            //Registrando transaçao
-            servico.adicionarTransacao(new Transacao(descUsuario, valUsuario, tipo));
-            System.out.println(textoTipo + " registrada com sucesso.");
-            return;
-        } catch (InputMismatchException e){
-            System.err.println("Erro: Caractere inválido inserido. Por favor, digite corretamente.");
-            entradaUsuario.nextLine();
+            double valor = scanner.nextDouble();
+
+            Transacao t = new Transacao(descricao, valor, tipo);
+            servico.adicionarTransacao(t); // Salva no banco automaticamente!
+
+            System.out.println("Sucesso! Salvo no banco de dados.");
+
+        } catch (InputMismatchException e) {
+            System.out.println("Erro: Valor inválido. Use vírgula para decimais (ex: 50,00).");
+            scanner.nextLine();
         }
     }
 }
